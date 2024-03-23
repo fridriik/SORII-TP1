@@ -46,7 +46,7 @@ static struct file_operations chardev_fops = {
 	.release = device_release,
 };
 
-static int __init chardev_init(void) {
+int __init init_module(void) {
 	major = register_chrdev(0, DEVICE_NAME, &chardev_fops);
 	if (major < 0) {
 		pr_alert("Registrar el char device fallo con %d\n", major);
@@ -56,14 +56,16 @@ static int __init chardev_init(void) {
 	cls = class_create(THIS_MODULE, DEVICE_NAME);
 	device_create(cls, NULL, MKDEV(major, 0), NULL, DEVICE_NAME);
 	pr_info("Dispositivo creado en /dev/%s\n", DEVICE_NAME);
+	printk (KERN_INFO "%s registrado\n", DEVICE_NAME);
 	return SUCCESS;
 }
 
-static void __exit chardev_exit(void) { 
+static void __exit exit_module(void) { 
 	device_destroy(cls, MKDEV(major, 0)); 
 	class_destroy(cls); 
 	/* Desregistra el dispositivo */
-	unregister_chrdev(major, DEVICE_NAME); 
+	unregister_chrdev(major, DEVICE_NAME);
+	printk (KERN_INFO "%s desregistrado\n", DEVICE_NAME);
 }
 
 /*Metodos*/
@@ -86,10 +88,10 @@ static int device_open(struct inode *inode, struct file *file) {
 	return SUCCESS; 
 } 
 
-/*Se llama cuando un proceso ya abrio el archivo e intenta leer desde ahi*/ 
+/*Se llama cuando un proceso ya abrio el archivo e intenta leer desde ahi
 static ssize_t device_read(struct file *filp, char __user *buffer, size_t length, loff_t *offset) { 
-	//Number of bytes actually written to the buffer
-	/*int bytes_read = 0; 
+	Number of bytes actually written to the buffer
+	int bytes_read = 0; 
 	const char *msg_ptr = msg; 
 	if (!*(msg_ptr + *offset)) { 
 		//we are at the end of message
@@ -103,12 +105,11 @@ static ssize_t device_read(struct file *filp, char __user *buffer, size_t length
 		bytes_read++; 
 	} 
 	*offset += bytes_read; //Most read functions return the number of bytes put into the buffer.
-	return bytes_read; */
-	return simple_read_from_buffer(buffer, length, offset, msg, strlen(msg));
-} 
+	return bytes_read;
+	//return simple_read_from_buffer(buffer, length, offset, msg, strlen(msg));
+}*/
 
-/*Se llama cuando un proceso quiere escribir en el archivo dev
-echo "tu mensaje" > /dev/dispositivo*/ 
+//Se llama cuando un proceso quiere escribir en el archivo dev echo "tu mensaje" > /dev/dispositivo 
 static ssize_t device_write(struct file *filp, const char *buff, size_t len, loff_t * off) {
 	strncpy(msg, buff, len);
     msg[len] = '\0';
@@ -116,25 +117,28 @@ static ssize_t device_write(struct file *filp, const char *buff, size_t len, lof
     return len;
 }
 
-/*Punto 5
+//Read invertido
 static ssize_t device_read(struct file *filp, char *buffer, size_t length, loff_t * offset)
 {
     char reversed_msg[100] = {0};
     int msg_len = strlen(msg);
     int i;
-
-    // Invertir el mensaje
-    for(i = 0; i < msg_len; i++)
-    {
-        reversed_msg[i] = msg[msg_len - i - 1];
+    
+    if(msg[msg_len - 1] == '\n'){
+    	msg_len--;
     }
 
-    return simple_read_from_buffer(buffer, length, offset, reversed_msg, msg_len);
-}*/
+    // Invertir el mensaje
+    for(i = 0; i < msg_len; i++){
+        reversed_msg[i] = msg[msg_len - i - 1];
+    }
+    
+    reversed_msg[msg_len] = '\n';
 
-module_init(chardev_init);
-module_exit(chardev_exit);
+    return simple_read_from_buffer(buffer, length, offset, reversed_msg, msg_len + 1);
+}
 
+module_exit(exit_module);
 MODULE_LICENSE("GPL");
 
 
