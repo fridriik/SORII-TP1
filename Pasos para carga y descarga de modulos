@@ -1,6 +1,0 @@
-1) Colocar el archivo del codigo fuente del modulo junto con el archivo Makefile en el mismo directorio.
-2) Abrir una terminal en ese directorio y ejecutar el comando ¨make¨ para compilar el modulo del kernel.
-3) Cargar el modulo con el comando ¨sudo insmod modulo.ko¨.
-4) Verificar la carga del modulo con el comando ¨dmesg | tail¨
-5) Descargar el modulo con el comando ¨sudo rmmod modulo¨
-6) Verificar la descarga del modulo con el comando ¨dmesg | tail¨
