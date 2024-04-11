@@ -88,9 +88,9 @@ static int device_open(struct inode *inode, struct file *file) {
 	return SUCCESS; 
 } 
 
-/*Se llama cuando un proceso ya abrio el archivo e intenta leer desde ahi
+/*//Se llama cuando un proceso ya abrio el archivo e intenta leer desde ahi
 static ssize_t device_read(struct file *filp, char __user *buffer, size_t length, loff_t *offset) { 
-	Number of bytes actually written to the buffer
+	//Number of bytes actually written to the buffer
 	int bytes_read = 0; 
 	const char *msg_ptr = msg; 
 	if (!*(msg_ptr + *offset)) { 
